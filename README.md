@@ -10,7 +10,7 @@ Windows 10 ✔
 
 ## Getting Started
 
-1. Install this extension from the Visual Studio Code Marketplace.
+1. Install this extension from the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=syfxlin.vscode-acrylic).
 2. Turn on any dark theme (because these effects don't work well on bright colors)
 3. Press F1 and Activate command "Reload Acrylic".
 4. Restart VSCode
@@ -33,6 +33,7 @@ The Acrylic effect on Windows has a sliding delay, but there is no problem with 
 
 ## Links
 
+- [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=syfxlin.vscode-acrylic)
 - [Github](https://github.com/syfxlin/vscode-acrylic)
 - [Introduction](https://blog.ixk.me/vscode-acrylic)
 
