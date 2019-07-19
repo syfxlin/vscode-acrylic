@@ -123,7 +123,7 @@ function activate(context) {
 	.monaco-workbench,
 	.monaco-workbench>.part,
 	body {
-		background: transparent !important;
+		background: rgba(0,0,0,0.20) !important;
 	}
 	
 	.editor-group-container>.tabs {
