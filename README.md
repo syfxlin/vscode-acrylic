@@ -1,6 +1,6 @@
 # Acrylic - VSCode Extension
 
-> Add Acrylic or other background effects to VSCode.
+>  :art: Add Acrylic,BlurBehind,TransparentGradient background effects to VSCode(Windows).
 
 ![screenshot](https://raw.githubusercontent.com/syfxlin/vscode-acrylic/master/screenshot.png)
 
@@ -12,8 +12,9 @@ Windows 10 ✔
 
 1. Install this extension from the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=syfxlin.vscode-acrylic).
 2. Turn on any dark theme (because these effects don't work well on bright colors)
-3. Press F1 and Activate command "Reload Acrylic".
-4. Restart VSCode
+3. Edit setting.json add `"vscode_acrylic.effect": "acrylic"` or `blurBehind`,`trGradient`,`disable`
+4. Press F1 and Activate command "Enable Acrylic".
+5. Restart VSCode
 
 Please "Enable Acrylic" with admin privileges.
 
