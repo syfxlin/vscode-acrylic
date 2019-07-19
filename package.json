@@ -1,0 +1,66 @@
+{
+  "name": "vscode-acrylic",
+  "displayName": "Acrylic",
+  "description": "Visual Studio Code acrylic and other effects on Windows platform",
+  "version": "1.0.0",
+  "publisher": "syfxlin",
+  "author": {
+    "email": "syfxlin@gmail.com",
+    "name": "Otstar Lin",
+    "url": "https://ixk.me"
+  },
+  "engines": {
+    "vscode": "^1.28.0"
+  },
+  "categories": [
+    "Other",
+    "Themes"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/syfxlin/vscode-acrylic"
+  },
+  "bugs": {
+    "url": "https://github.com/syfxlin/vscode-acrylic/issues"
+  },
+  "preview": true,
+  "icon": "images/logo.png",
+  "galleryBanner": {
+    "color": "#EEEEEE"
+  },
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./src/extension",
+  "contributes": {
+    "commands": [{
+        "command": "extension.installAcrylic",
+        "title": "Enable Acrylic"
+      },
+      {
+        "command": "extension.uninstallAcrylic",
+        "title": "Disable Acrylic"
+      },
+      {
+        "command": "extension.updateAcrylic",
+        "title": "Reload Acrylic"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Acrylic Configuration",
+      "properties": {
+        "vscode_acrylic.effect": {
+          "description": "vscode-acrylic effect type",
+          "type": "string",
+          "default": ""
+        }
+      }
+    }
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "file-url": "^2.0.2",
+    "xmlhttprequest": "^1.8.0"
+  }
+}
