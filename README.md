@@ -35,7 +35,7 @@ The Acrylic effect on Windows has a sliding delay, but there is no problem with 
 
 - [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=syfxlin.vscode-acrylic)
 - [Github](https://github.com/syfxlin/vscode-acrylic)
-- [Introduction](https://blog.ixk.me/vscode-acrylic)
+- [Introduction](https://blog.ixk.me/vscode-acrylic.html)
 
 ## Thinks
 
