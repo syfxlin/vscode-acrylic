@@ -135,7 +135,7 @@ function activate(context) {
 	}
 	
 	.editor-group-container>.tabs .tab.active, .editor-group-container>.tabs .monaco-breadcrumbs {
-		background-color: rgba(37, 37, 37,0.3) !important;
+		background-color: rgba(37, 37, 37,0.4) !important;
 	}
 	
 	.monaco-list.settings-toc-tree .monaco-list-row.focused {
@@ -181,13 +181,34 @@ function activate(context) {
 
 	
 	.monaco-workbench>.part.sidebar {
-		background-color: rgba(37, 37, 38, 0.3) !important;
+		background-color: rgba(37, 37, 37, 0.4) !important;
 	}
-	
-	
 	.editor-group-container>.tabs .tab {
 		border: none !important;
-	}
+  }
+  .monaco-panel-view .panel>.panel-header {
+    background: rgba(37, 37, 37, 0.4) !important;
+  }
+  .monaco-workbench .panel.integrated-terminal *:not(.xterm-cursor):not(.xterm-cursor-block) {
+    background: transparent !important;
+  }
+  .monaco-workbench .panel.integrated-terminal *:hover:not(.xterm-cursor):not(.xterm-cursor-block) {
+    background: transparent !important;
+  }
+  .monaco-workbench .panel.integrated-terminal .terminal-outer-container {
+    background-color: rgba(37, 37, 37,0.4);
+  }
+  .monaco-select-box {
+    background-color: transparent !important;
+    color: rgb(240, 240, 240) !important;
+    border-color: rgba(37, 37, 37,0.4) !important;
+  }
+  .monaco-editor .find-widget {
+    background-color: rgba(37, 37, 37,1);
+  }
+  .monaco-editor .view-overlays .current-line {
+    background: rgba(41, 41, 41,0.8) !important;
+  }
 	</style>
 	`;
 

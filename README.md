@@ -24,6 +24,12 @@ Press F1 and Activate command "Disable Acrylic", and Restart VSCode.
 
 ## FAQs
 
+#### Why is my terminal still black?
+
+You should change the renderer type of the terminal to dom
+
+`"terminal.integrated.rendererType": "dom"`
+
 #### Why not supported MacOS?
 
 The [vibrancy](https://github.com/EYHN/vscode-vibrancy) plugin has been implemented without the need to do duplicates. And the effect of MacOS is different from Windows.
