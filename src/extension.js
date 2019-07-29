@@ -209,6 +209,9 @@ function activate(context) {
   .monaco-editor .view-overlays .current-line {
     background: rgba(41, 41, 41,0.8) !important;
   }
+  .monaco-workbench .panel.integrated-terminal .find-focused .xterm .xterm-viewport, .monaco-workbench .panel.integrated-terminal .xterm.focus .xterm-viewport, .monaco-workbench .panel.integrated-terminal .xterm:focus .xterm-viewport, .monaco-workbench .panel.integrated-terminal .xterm:hover .xterm-viewport {
+    background: transparent !important;
+  }
 	</style>
 	`;
 
