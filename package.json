@@ -2,7 +2,7 @@
 	"name": "vscode-acrylic",
 	"displayName": "Acrylic",
 	"description": "Visual Studio Code acrylic and other effects on Windows platform",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"publisher": "syfxlin",
 	"author": {
 		"email": "syfxlin@gmail.com",
