@@ -7,6 +7,24 @@ var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 
 var fileUrl = require("file-url");
 
+const readFile = (path, opts = 'utf8') => {
+  new Promise((resolve, reject) => {
+    fs.readFile(path, opts, (err, data) => {
+      if (err) reject(err)
+      else resolve(data)
+    })
+  })
+}
+
+const writeFile = (path, data, opts = 'utf8') => {
+  new Promise((resolve, reject) => {
+    fs.writeFile(path, data, opts, (err) => {
+      if (err) reject(err)
+      else resolve()
+    })
+  })
+}
+
 function activate(context) {
   console.log("vscode-acrylic is active!");
 
@@ -28,11 +46,13 @@ function activate(context) {
     (isWin
       ? "\\electron-browser\\workbench\\workbench.html"
       : "/electron-browser/workbench/workbench.html");
+  var jsFile = appDir + (isWin ? '\\main.js' : '/main.js');
   var htmlFileBack =
     base +
     (isWin
       ? "\\electron-browser\\workbench\\workbench.html.bak-acrylic"
       : "/electron-browser/workbench/workbench.bak-acrylic");
+  var jsFileBack = appDir + (isWin ? '\\main.bak-acrylic' : '/main.bak-acrylic')
 
   var config = vscode.workspace.getConfiguration("vscode_acrylic");
   if (
@@ -45,150 +65,133 @@ function activate(context) {
     fUninstall();
     return;
   }
+
+  var injectJS = `
+  (function(){
+    const electron = require('electron');
+    electron.app.on('browser-window-created', (event, window) => {
+      window.webContents.on('dom-ready', () => {
+        var vscode_acrylic = {
+          config: ${JSON.stringify(config.effect)},
+          w: window,
+          ewcBase: require(${JSON.stringify(__dirname + "\\ewc.node")}),
+          SWCA: (wind, accent, tint) => {
+            wind = wind.getNativeWindowHandle();
+            return vscode_acrylic.ewcBase.setComposition(wind, accent, tint);
+          },
+          ewc: {
+            disable: (wind) => {
+              return vscode_acrylic.SWCA(wind, 0, 0x00000000);
+            },
+            setGradient: (wind, tint) => {
+              return vscode_acrylic.SWCA(wind, 1, tint);
+            },
+            setTransparentGradient: (wind, tint) => {
+              return vscode_acrylic.SWCA(wind, 2, tint);
+            },
+            setBlurBehind: (wind, tint) => {
+              return vscode_acrylic.SWCA(wind, 3, tint);
+            },
+            setAcrylic: (wind, tint) => {
+              return vscode_acrylic.SWCA(wind, 4, tint);
+            }
+          }
+        }
+  
+        vscode_acrylic.w.setBackgroundColor('#00000000');
+        if (vscode_acrylic.config === "acrylic") {
+            vscode_acrylic.ewc.setAcrylic(vscode_acrylic.w, 0x14800020);
+        } else if (vscode_acrylic.config === "blurBehind") {
+            vscode_acrylic.ewc.setBlurBehind(vscode_acrylic.w, 0x14800020);
+        } else if (vscode_acrylic.config === "trGradient") {
+            vscode_acrylic.ewc.setTransparentGradient(vscode_acrylic.w, 0x14800020);
+        } else if (vscode_acrylic.config === "disable") {
+            vscode_acrylic.ewc.disable(vscode_acrylic.w, 0x14800020);
+        }
+        // hack
+        const width = vscode_acrylic.w.getBounds().width;
+        vscode_acrylic.w.setBounds({
+          width: width + 1,
+        });
+        vscode_acrylic.w.setBounds({
+          width,
+        });
+      });
+    })
+  })()
+  `;
   var injectHTML = `
-  <script>
-	window.vscode_acrylic = {
-    config: "${config.effect}",
-		w: nodeRequire('electron').remote.getCurrentWindow(),
-		ewcBase: nodeRequire(${JSON.stringify(__dirname + "\\ewc.node")}),
-		SWCA: (wind, accent, tint) => {
-			wind = wind.getNativeWindowHandle();
-			return vscode_acrylic.ewcBase.setComposition(wind, accent, tint);
-		},
-		ewc: {
-			disable: (wind) => {
-				return vscode_acrylic.SWCA(wind, 0, 0x00000000);
-			},
-			setGradient: (wind, tint) => {
-				return vscode_acrylic.SWCA(wind, 1, tint);
-			},
-			setTransparentGradient: (wind, tint) => {
-				return vscode_acrylic.SWCA(wind, 2, tint);
-			},
-			setBlurBehind: (wind, tint) => {
-				return vscode_acrylic.SWCA(wind, 3, tint);
-			},
-			setAcrylic: (wind, tint) => {
-				return vscode_acrylic.SWCA(wind, 4, tint);
-			}
-		}
-	}
-
-  vscode_acrylic.w.setBackgroundColor('#00000000');
-  if (vscode_acrylic.config === "acrylic") {
-      vscode_acrylic.ewc.setAcrylic(vscode_acrylic.w, 0x14800020);
-  } else if (vscode_acrylic.config === "blurBehind") {
-      vscode_acrylic.ewc.setBlurBehind(vscode_acrylic.w, 0x14800020);
-  } else if (vscode_acrylic.config === "trGradient") {
-      vscode_acrylic.ewc.setTransparentGradient(vscode_acrylic.w, 0x14800020);
-  } else if (vscode_acrylic.config === "disable") {
-      vscode_acrylic.ewc.disable(vscode_acrylic.w, 0x14800020);
-  }
-	// hack
-	const width = vscode_acrylic.w.getBounds().width;
-	vscode_acrylic.w.setBounds({
-		width: width + 1,
-	});
-	vscode_acrylic.w.setBounds({
-		width,
-	});
-
-	</script>
-
 	<style>
 	html {
-		background: 'transparent' !important;
+		background: transparent !important;
 	}
-	
 	.scroll-decoration {
 		box-shadow: none !important;
 	}
-	
-	.minimap, .editor-scrollable>.decorationsOverviewRuler {
+	.minimap, .editor-scrollable .decorationsOverviewRuler {
 		opacity: 0.6;
 	}
-	
 	.editor-container {
 		background: transparent !important;
 	}
-	
 	.search-view .search-widget .input-box, .search-view .search-widget .input-box .monaco-inputbox,
-	.monaco-workbench>.part.editor>.content>.one-editor-silo>.container>.title .tabs-container>.tab,
+	.monaco-workbench .part.editor .content .one-editor-silo .container .title .tabs-container .tab,
 	.monaco-editor-background,
 	.monaco-editor .margin,
-	.monaco-workbench>.part>.content,
-	.monaco-workbench>.editor>.content>.one-editor-silo.editor-one,
-	.monaco-workbench>.part.editor>.content>.one-editor-silo>.container>.title,
-	.monaco-workbench>.part>.title,
+	.monaco-workbench .editor .content .one-editor-silo.editor-one,
+	.monaco-workbench .part.editor .content .one-editor-silo .container .title,
+	.monaco-workbench .part .title,
 	.monaco-workbench,
-	.monaco-workbench>.part,
 	body {
-		background: rgba(0,0,0,0.20) !important;
+		background: rgba(37, 37, 37, 0.20) !important;
 	}
-	
-	.editor-group-container>.tabs {
+	.editor-group-container .tabs {
 		background-color: transparent !important;
 	}
-	
-	.editor-group-container>.tabs .tab {
+	.editor-group-container .tabs .tab {
 		background-color: transparent !important;
 	}
-	
-	.editor-group-container>.tabs .tab.active, .editor-group-container>.tabs .monaco-breadcrumbs {
+	.editor-group-container .tabs .tab.active, .editor-group-container .tabs .monaco-breadcrumbs {
 		background-color: rgba(37, 37, 37,0.4) !important;
 	}
-	
 	.monaco-list.settings-toc-tree .monaco-list-row.focused {
 		outline-color: rgb(37, 37, 37,0.6) !important;
 	}
-	
 	.monaco-list.settings-toc-tree .monaco-list-row.selected,
 	.monaco-list.settings-toc-tree .monaco-list-row.focused,
 	.monaco-list .monaco-list-row.selected,
 	.monaco-list.settings-toc-tree:not(.drop-target) .monaco-list-row:hover:not(.selected):not(.focused) {
 		background-color: rgb(37, 37, 37,0.6) !important;
 	}
-	
 	.monaco-list.settings-editor-tree .monaco-list-row {
 		background-color: transparent !important;
 		outline-color: transparent !important;
 	}
-	
 	.monaco-inputbox {
-		background-color: rgba(41, 41, 41,0.2) !important;
+		background-color: rgba(41, 41, 41, 0.2) !important;
 	}
-	
 	.monaco-editor .selected-text {
-		background-color: rgba(58, 61, 65,0.6) !important;
+		background-color: rgba(58, 61, 65, 0.6) !important;
 	}
-	
 	.monaco-editor .focused .selected-text {
-		background-color: rgba(38, 79, 120,0.6) !important;
+		background-color: rgba(38, 79, 120, 0.6) !important;
 	}
-	
 	.monaco-editor .view-overlays .current-line {
 		border-color: rgba(41, 41, 41,0.2) !important;
 	}
 	
 	.extension-editor,
-	.monaco-inputbox>.wrapper>.input,
-	.monaco-workbench>.part.editor>.content>.one-editor-silo>.container>.title .tabs-container>.tab.active,
-	.preferences-editor>.preferences-header,
-	.preferences-editor>.preferences-editors-container.side-by-side-preferences-editor .preferences-header-container,
+	.monaco-inputbox .wrapper .input,
+	.monaco-workbench .part.editor .content .one-editor-silo .container .title .tabs-container .tab.active,
+	.preferences-editor .preferences-header,
+	.preferences-editor .preferences-editors-container.side-by-side-preferences-editor .preferences-header-container,
 	.monaco-editor, .monaco-editor .inputarea.ime-input {
 		background: transparent !important;
 	}
-
-	
-	.monaco-workbench>.part.sidebar {
-		background-color: rgba(37, 37, 37, 0.4) !important;
-	}
-	.editor-group-container>.tabs .tab {
+	.editor-group-container .tabs .tab {
 		border: none !important;
   }
-  .monaco-panel-view .panel>.panel-header {
-    background: rgba(37, 37, 37, 0.4) !important;
-  }
+
   .monaco-workbench .panel.integrated-terminal *:not(.xterm-cursor):not(.xterm-cursor-block) {
     background: transparent !important;
   }
@@ -204,13 +207,32 @@ function activate(context) {
     border-color: rgba(37, 37, 37,0.4) !important;
   }
   .monaco-editor .find-widget {
-    background-color: rgba(37, 37, 37,1);
+    background-color: rgba(37, 37, 37, 1);
   }
   .monaco-editor .view-overlays .current-line {
-    background: rgba(41, 41, 41,0.8) !important;
+    background: rgba(41, 41, 41, 0.8) !important;
   }
   .monaco-workbench .panel.integrated-terminal .find-focused .xterm .xterm-viewport, .monaco-workbench .panel.integrated-terminal .xterm.focus .xterm-viewport, .monaco-workbench .panel.integrated-terminal .xterm:focus .xterm-viewport, .monaco-workbench .panel.integrated-terminal .xterm:hover .xterm-viewport {
     background: transparent !important;
+  }
+  
+	.monaco-workbench .part:not(.editor):not(.sidebar) {
+		background-color: rgba(37, 37, 37, 0.6) !important;
+  }
+	.monaco-workbench .part.editor .content {
+    background-color: rgba(37, 37, 37, 0.45) !important;
+  }
+  .monaco-workbench .part.sidebar {
+    background-color: transparent !important;
+  }
+  .monaco-workbench .part.sidebar .composite.title {
+    background-color: rgba(37, 37, 37, 0.6) !important;
+  }
+  .monaco-panel-view .panel .panel-body {
+    background: rgba(37, 37, 37, 0.45) !important;
+  }
+  .monaco-panel-view .panel .panel-header {
+    background: rgba(37, 37, 37, 0.6) !important;
   }
 	</style>
 	`;
@@ -227,57 +249,27 @@ function activate(context) {
       html = html.replace(
         /(<\/html>)/,
         "<!-- !! VSCODE-ACRYLIC-START !! -->" +
-          injectHTML +
+          injectHTML + 
           "<!-- !! VSCODE-ACRYLIC-END !! --></html>"
       );
       fs.writeFileSync(htmlFile, html, "utf-8");
-      enabledRestart();
     } catch (e) {
+      vscode.window.showInformationMessage(msg.admin);
       console.log(e);
     }
   }
 
-  function timeDiff(d1, d2) {
-    var timeDiff = Math.abs(d2.getTime() - d1.getTime());
-    return timeDiff;
-  }
-
-  function hasBeenUpdated(stats1, stats2) {
-    var dbak = new Date(stats1.ctime);
-    var dor = new Date(stats2.ctime);
-    var segs = timeDiff(dbak, dor) / 1000;
-    return segs > 60;
-  }
-
-  function cleanCssInstall() {
-    var c = fs
-      .createReadStream(htmlFile)
-      .pipe(fs.createWriteStream(htmlFileBack));
-    c.on("finish", function() {
-      replaceCss();
-    });
-  }
-
-  function installItem(bakfile, orfile, cleanInstallFunc) {
-    fs.stat(bakfile, function(errBak, statsBak) {
-      if (errBak) {
-        // clean installation
-        cleanInstallFunc();
-      } else {
-        // check htmlFileBack's timestamp and compare it to the htmlFile's.
-        fs.stat(orfile, function(errOr, statsOr) {
-          if (errOr) {
-            vscode.window.showInformationMessage(msg.smthingwrong + errOr);
-          } else {
-            var updated = hasBeenUpdated(statsBak, statsOr);
-            if (updated) {
-              // some update has occurred. clean install
-              cleanInstallFunc();
-            }
-          }
-        });
-      }
-    });
+  function replaceJs() {
+    try {
+      var js = fs.readFileSync(jsFile, "utf-8");
+      js = js.replace(/<!-- !! VSCODE-ACRYLIC-START !! -->[\s\S]*?<!-- !! VSCODE-ACRYLIC-END !! -->/,
+        "");
+      js = js + "\n/* !! VSCODE-ACRYLIC-START !! */\n" + injectJS + "\n/* !! VSCODE-ACRYLIC-END !! */\n";
+      fs.writeFileSync(jsFile, js, "utf-8");
+    } catch (e) {
+      vscode.window.showInformationMessage(msg.admin);
+      console.log(e);
+    }
   }
 
   function emitEndUninstall() {
@@ -296,64 +288,61 @@ function activate(context) {
 
   function restoreBak(willReinstall) {
     var restore = 0;
-    fs.unlink(htmlFile, function(err) {
-      if (err) {
-        vscode.window.showInformationMessage(msg.admin);
-        return;
-      }
-      var c = fs
-        .createReadStream(htmlFileBack)
-        .pipe(fs.createWriteStream(htmlFile));
-      c.on("finish", function() {
-        fs.unlinkSync(htmlFileBack);
-        restore++;
-        restoredAction(restore, willReinstall);
-      });
-    });
-  }
-
-  function reloadWindow() {
-    // reload vscode-window
-    vscode.commands.executeCommand("workbench.action.reloadWindow");
+    try {
+      fs.unlinkSync(htmlFile);
+      fs.unlinkSync(jsFile);
+      fs.writeFileSync(htmlFile, fs.readFileSync(htmlFileBack));
+      fs.writeFileSync(jsFile, fs.readFileSync(jsFileBack));
+      fs.unlinkSync(htmlFileBack);
+      fs.unlinkSync(jsFileBack);
+      restore++;
+      restoredAction(restore, willReinstall);
+    } catch (e) {
+      vscode.window.showInformationMessage(msg.admin);
+    }
   }
 
   function enabledRestart() {
     vscode.window
       .showInformationMessage(msg.enabled, { title: msg.restartIde })
-      .then(function(msg) {
-        reloadWindow();
+      .then(msg => {
+        vscode.commands.executeCommand("workbench.action.reloadWindow");
       });
   }
   function disabledRestart() {
     vscode.window
       .showInformationMessage(msg.disabled, { title: msg.restartIde })
-      .then(function(msg) {
-        reloadWindow();
+      .then(msg => {
+        vscode.commands.executeCommand("workbench.action.reloadWindow");
       });
   }
 
   // ####  main commands ######################################################
 
   function fInstall() {
-    installItem(htmlFileBack, htmlFile, cleanCssInstall);
+    fs.writeFileSync(htmlFileBack, fs.readFileSync(htmlFile));
+    fs.writeFileSync(jsFileBack, fs.readFileSync(jsFile));
+    replaceCss();
+    replaceJs();
+    enabledRestart();
   }
 
   function fUninstall(willReinstall) {
-    fs.stat(htmlFileBack, function(errBak, statsBak) {
-      if (errBak) {
-        if (willReinstall) {
-          emitEndUninstall();
-        }
-        return;
+    try {
+      fs.statSync(htmlFileBack);
+      fs.statSync(jsFileBack);
+    } catch (e) {
+      if (willReinstall) {
+        emitEndUninstall();
       }
-      fs.stat(htmlFile, function(errOr, statsOr) {
-        if (errOr) {
-          vscode.window.showInformationMessage(msg.smthingwrong + errOr);
-        } else {
-          restoreBak(willReinstall);
-        }
-      });
-    });
+    }
+    try {
+      fs.statSync(htmlFile);
+      fs.statSync(jsFile);
+    } catch (e) {
+      vscode.window.showInformationMessage(msg.smthingwrong + errOr);
+    }
+    restoreBak(willReinstall);
   }
 
   function fUpdate() {
