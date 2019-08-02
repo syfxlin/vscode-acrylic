@@ -1,6 +1,6 @@
 # Acrylic - VSCode Extension
 
->  :art: Add Acrylic,BlurBehind,TransparentGradient background effects to VSCode(Windows).
+> :art: Add Acrylic,BlurBehind,TransparentGradient background effects to VSCode(Windows).
 
 ![screenshot](https://raw.githubusercontent.com/syfxlin/vscode-acrylic/master/screenshot.png)
 
@@ -29,6 +29,10 @@ Press F1 and Activate command "Disable Acrylic", and Restart VSCode.
 You should change the renderer type of the terminal to dom
 
 `"terminal.integrated.rendererType": "dom"`
+
+#### Why is it only changed color when enabled, but not transparent?
+
+You need to turn VSCode off and back on instead of using reload window.
 
 #### Why not supported MacOS?
 
